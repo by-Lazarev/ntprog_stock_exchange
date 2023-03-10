@@ -7,7 +7,7 @@ import ntpro_server
 
 api = fastapi.FastAPI()
 server = ntpro_server.NTProServer()
-html = pathlib.Path('test.html').read_text()
+html = pathlib.Path("static/test.html").read_text()
 
 
 @api.get('/')

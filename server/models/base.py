@@ -7,7 +7,7 @@ from typing import TypeVar
 
 import pydantic
 
-from server.enums import ClientMessageType, ServerMessageType
+from enums import ClientMessageType, ServerMessageType
 
 
 def snake_to_camel(snake_str: str) -> str:
