@@ -1,15 +1,15 @@
 HANDLERS
 
 * make task handler
-* make response handler
+* make response handler [+]
 
 SubscribeMarketData
 
-* implement tasks in handler
+* implement tasks in handler.py
 
 UnsubscribeMarketData
 
-* change error on ErrorInfo msg
+* change error on ErrorInfo msg [+]
 
 PlaceOrder
 

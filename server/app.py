@@ -1,32 +1,37 @@
 import mimetypes
-import pathlib
-
-import fastapi
+from pathlib import Path
+from fastapi import FastAPI, responses, WebSocket, WebSocketDisconnect
 
 import ntpro_server
+from routers import db_test
+from db.database import engine, Base
 
-api = fastapi.FastAPI()
+api = FastAPI()
+api.include_router(db_test.router)
+
 server = ntpro_server.NTProServer()
-html = pathlib.Path("static/test.html").read_text()
+html = Path("static/test.html").read_text()
+Base.metadata.create_all(engine)
 
+# ---[METHODS]---
 
 @api.get('/')
 async def get():
-    return fastapi.responses.HTMLResponse(html)
+    return responses.HTMLResponse(html)
 
 
 @api.get('/static/{path}')
-async def get(path: pathlib.Path):
-    static_file = (pathlib.Path('static') / path).read_text()
+async def get(path: Path):
+    static_file = (Path('static') / path).read_text()
     mime_type, encoding = mimetypes.guess_type(path)
-    return fastapi.responses.PlainTextResponse(static_file, media_type=mime_type)
+    return responses.PlainTextResponse(static_file, media_type=mime_type)
 
 
 @api.websocket('/ws/')
-async def websocket_endpoint(websocket: fastapi.WebSocket):
+async def websocket_endpoint(websocket: WebSocket):
     await server.connect(websocket)
 
     try:
         await server.serve(websocket)
-    except fastapi.WebSocketDisconnect:
+    except WebSocketDisconnect:
         server.disconnect(websocket)

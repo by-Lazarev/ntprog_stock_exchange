@@ -17,5 +17,9 @@ async def subscribe_handler():
     await asyncio.sleep(1)
 
 
-def response_handler():
-    pass
+def response_handler(response_type: int, message: object) -> dict:
+    response = {
+        "messageType": response_type,
+        "message": message
+    }
+    return response

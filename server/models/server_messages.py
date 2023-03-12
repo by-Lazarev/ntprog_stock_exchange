@@ -6,16 +6,17 @@ from typing import TypeVar
 import bidict as bidict
 
 import enums
+from enum import Enum
 from models.base import Envelope, Message, Quote
 
-MESSAGE_TYPE = {
-    "SubscribeMarketData": 1,
-    "UnsubscribeMarketData": 2,
-    "PlaceOrder": 3,
-    "CancelOrder": 4,
-    "SuccessInfo": 5,
-    "ErrorInfo": 6
-}
+
+class MessageType(Enum):
+    SubscribeMarketData: int = 1
+    UnsubscribeMarketData: int = 2
+    PlaceOrder: int = 3
+    CancelOrder: int = 4
+    SuccessInfo: int = 5
+    ErrorInfo: int = 6
 
 
 class ServerMessage(Message):
