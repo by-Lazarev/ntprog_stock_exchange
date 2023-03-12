@@ -8,7 +8,8 @@ import bidict as bidict
 import fastapi
 import pydantic
 
-import message_processors, enums
+import message_processors
+import enums
 from models.base import Envelope, Message
 from models.server_messages import ServerMessageT
 

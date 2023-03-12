@@ -1,6 +1,16 @@
 from __future__ import annotations
 
+from fastapi import HTTPException
+import asyncio
+import uuid
+from datetime import datetime
 from typing import TYPE_CHECKING
+from random import randint
+
+from schemas import OrderBase
+from enums import *
+from handlers.task_handlers import *
+from models import server_messages
 
 
 if TYPE_CHECKING:
@@ -15,11 +25,14 @@ async def subscribe_market_data_processor(
         websocket: fastapi.WebSocket,
         message: client_messages.SubscribeMarketData,
 ):
-    from server.models import server_messages
-
-    # TODO ...
-
-    return server_messages.SuccessInfo()
+    current_connection = server.connections[websocket.client]
+    new_id = create_id()
+    current_connection.subscriptions.append(asyncio.create_task(subscribe_handler(), name=str(new_id)))
+    response = {
+        "messageType": server_messages.MESSAGE_TYPE["SuccessInfo"],
+        "message": server_messages.SuccessInfo(subscriptionId=new_id)
+    }
+    return response
 
 
 async def unsubscribe_market_data_processor(
@@ -27,11 +40,24 @@ async def unsubscribe_market_data_processor(
         websocket: fastapi.WebSocket,
         message: client_messages.UnsubscribeMarketData,
 ):
-    from server.models import server_messages
+    current_connection = server.connections[websocket.client]
+    task = None
+    for task in current_connection.subscriptions:
+        if task.get_name() == message.subscription_id:
+            break
+    if task is None:
+        raise HTTPException(  # change to ErrorInfo
+            status_code=404,
+            detail=f"Task with uuid {message.subscription_id} not found"
+        )
+    current_connection.subscriptions.remove(task)
+    task.cancel()
 
-    # TODO ...
-
-    return server_messages.SuccessInfo()
+    response = {
+        "messageType": server_messages.MESSAGE_TYPE["SuccessInfo"],
+        "message": server_messages.SuccessInfo(subscriptionId=message.subscription_id)
+    }
+    return response
 
 
 async def place_order_processor(
@@ -39,8 +65,23 @@ async def place_order_processor(
         websocket: fastapi.WebSocket,
         message: client_messages.PlaceOrder,
 ):
-    from server.models import server_messages
+    new_order = OrderBase(
+        creation_time=datetime.now(),
+        change_time=datetime.now(),
+        status=OrderStatus.active,
+        side=OrderSide(message.side),
+        price=message.price,
+        amount=message.amount,
+        instrument=Instrument(message.instrument)
+    )
+    new_id = create_id()
+    # add db connection -> add, commit, refresh
+    response = {
+        "messageType": server_messages.MESSAGE_TYPE["SuccessInfo"],
+        "message": server_messages.SuccessInfo(orderId=new_id)
+    }
+    return response
 
-    # TODO ...
 
-    return server_messages.SuccessInfo()
+def cancel_order_processor():
+    pass

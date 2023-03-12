@@ -8,6 +8,15 @@ import bidict as bidict
 import enums
 from models.base import Envelope, Message, Quote
 
+MESSAGE_TYPE = {
+    "SubscribeMarketData": 1,
+    "UnsubscribeMarketData": 2,
+    "PlaceOrder": 3,
+    "CancelOrder": 4,
+    "SuccessInfo": 5,
+    "ErrorInfo": 6
+}
+
 
 class ServerMessage(Message):
     def get_type(self: ServerMessageT) -> enums.ServerMessageType:
@@ -19,7 +28,8 @@ class ErrorInfo(ServerMessage):
 
 
 class SuccessInfo(ServerMessage):
-    ...
+    subscriptionId: uuid.UUID | None = None
+    orderId: uuid.UUID | None = None
 
 
 class ExecutionReport(ServerMessage):
