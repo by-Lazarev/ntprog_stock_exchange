@@ -1,8 +1,30 @@
 import uuid
 from uuid import uuid4
-import asyncio
+from asyncio import sleep
+from random import randint
+
+from enums import OrderStatus
 
 id_storage = set()
+
+
+class StatusHandler:
+    statuses = [OrderStatus.active,
+                OrderStatus.filled,
+                OrderStatus.rejected]
+
+    def create_status(self):
+        return self.statuses[randint(0, 2)]
+
+    def status_to_int(self, status):
+        try:
+            return self.statuses.index(status) + 1
+        except ValueError:
+            return 3
+
+
+def get_current_user(client):
+    return 1
 
 
 def create_id() -> uuid.UUID:
@@ -14,7 +36,7 @@ def create_id() -> uuid.UUID:
 
 
 async def subscribe_handler():
-    await asyncio.sleep(1)
+    await sleep(randint(0, 2))
 
 
 def response_handler(response_type: int, message: object) -> dict:

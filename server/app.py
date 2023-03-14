@@ -3,15 +3,14 @@ from pathlib import Path
 from fastapi import FastAPI, responses, WebSocket, WebSocketDisconnect
 
 import ntpro_server
-from routers import db_test
 from db.database import engine, Base
 
 api = FastAPI()
-api.include_router(db_test.router)
 
 server = ntpro_server.NTProServer()
 html = Path("static/test.html").read_text()
 Base.metadata.create_all(engine)
+
 
 # ---[METHODS]---
 

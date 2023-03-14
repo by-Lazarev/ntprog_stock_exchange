@@ -47,6 +47,10 @@ class PlaceOrder(ClientMessage):
     price: pydantic.condecimal(gt=decimal.Decimal())
 
 
+class CancelOrder(ClientMessage):
+    order_uuid: uuid.UUID
+
+
 _MESSAGE_PROCESSOR_BY_CLASS = {
     SubscribeMarketData: message_processors.subscribe_market_data_processor,
     UnsubscribeMarketData: message_processors.unsubscribe_market_data_processor,

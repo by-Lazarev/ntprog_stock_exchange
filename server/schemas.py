@@ -12,3 +12,5 @@ class OrderBase(BaseModel):
     price: float  # Change on decimal, as it is money
     amount: int
     instrument: Instrument
+    user_id: int
+    uuid: str

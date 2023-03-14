@@ -1,16 +1,12 @@
 from __future__ import annotations
 
-from fastapi import HTTPException
 import asyncio
-import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
-from random import randint
 
-from schemas import OrderBase
 from enums import *
-from handlers.task_handlers import *
-from models.server_messages import *
+from db.db_order import *
+from db.database import get_db
 
 
 if TYPE_CHECKING:
@@ -66,17 +62,22 @@ async def place_order_processor(
         websocket: fastapi.WebSocket,
         message: client_messages.PlaceOrder,
 ):
+    new_id = create_id()
+    current_connection = server.connections[websocket.client]
+    current_user = get_current_user(current_connection)
+    order_status = StatusHandler().create_status()
     new_order = OrderBase(
         creation_time=datetime.now(),
         change_time=datetime.now(),
-        status=OrderStatus.active,
+        status=order_status,
         side=OrderSide(message.side),
         price=message.price,
         amount=message.amount,
-        instrument=Instrument(message.instrument)
+        instrument=Instrument(message.instrument),
+        user_id=current_user,
+        uuid=str(new_id)
     )
-    new_id = create_id()
-    # add db connection -> add, commit, refresh
+    create_order(get_db(), new_order)
     response = response_handler(
         MessageType.SuccessInfo,
         SuccessInfo(orderId=new_id)
@@ -85,5 +86,13 @@ async def place_order_processor(
     return response
 
 
-def cancel_order_processor():
-    pass
+def cancel_order_processor(
+        server: NTProServer,
+        websocket: fastapi.WebSocket,
+        message: client_messages.CancelOrder
+):
+    current_connection = server.connections[websocket.client]
+    current_user = get_current_user(current_connection)
+    db = get_db()
+    response = delete_order(db, message.order_uuid, current_user)
+    return response
